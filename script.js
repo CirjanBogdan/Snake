@@ -1,130 +1,130 @@
 const board = document.getElementById('board');
-const mt = [];
-const cells = 10;
-let snake = [53, 54, 55];
-let snakeLength = snake.length - 1;
-let snakeHead = snake[snakeLength];
-let id = 0;
-let div;
+const width = 290;
+const height = 290;
+const cell = 10;
+let snake = [];
+let head;
+let food;
+let timer;
+let foodCounter = 0;
+let direction;
+let interval = 200;
+let gameStart = false;
 
-function generateBoard() {
-    for (let i = 0; i < cells; ++i) {
-        mt.push(cells);
-        for (let j = 0; j < cells; ++j) {
-            div = document.createElement('div');
-            div.setAttribute('id', id);
-            mt[i][j] = div;
-            if (snake.includes(id)) {
-                div.classList.add('snake');
-            }
-            div.textContent = id;
-            ++id;
-            board.appendChild(div);
-        }
-    }  
+const snakeImage = document.querySelector("img");
+snakeImage.src ="snake.jpg";
+
+addEventListener('DOMContentLoaded', onLoad);
+addEventListener('keydown', onKeyDown);
+
+function onLoad() {
+    generateSnake(130, 150);
+    generateFood(30);
 }
 
-let moveRight = 2;
-let moveLeft = 0;
-let moveUp = 0;
-let moveDOwn = 0;
-
-
-document.onkeydown = checkKey;
-
-function checkKey(e) {
-    if (e.keyCode >= 37 && e.keyCode <= 40) {
-        e.preventDefault();
+function generateSnake(left, top) {
+    for (let i = 0; i < 3; ++i) {
+        let div = document.createElement('div');
+        div.style.left = `${left - cell * i}px`;
+        div.style.top = `${top}px`;
+        snake.push(div);
+        board.appendChild(div);
     }
-    e = e || window.event;
-    if (e.keyCode == '39' && moveRight != 1 && moveLeft != 1) { //right
-        if (moveDOwn == 1) {
-            snakeHead -= 10;
-        }
-        ++snakeHead;   
-        moveRight = 1;
-        moveLeft = 0;
-        moveDOwn = 0;
-        moveUp = 0;
-        moveSnake();
-        
-    } else if (e.keyCode == '38' && moveRight < 2 && moveUp != 1 && moveDOwn != 1) { //up
-        if (moveRight == 1) {
-            snakeHead -= 1;
-        } else if (moveLeft == 1) {
-            snakeHead += 1;
-        }
-        moveUp = 1;
-        moveDOwn = 0;
-        moveRight = 0;
-        moveLeft = 0;
-        moveSnake();
+    head = snake[0];
+}
+
+function generateFood() {
+    let top = Math.floor(Math.random() * width / cell) * cell;
+    let left = Math.floor(Math.random() * width / cell) * cell;
+    food = document.createElement('div');
+    food.style.top = `${top}px`;
+    food.style.left = `${left}px`;
+    food.style.backgroundColor = "black";
+    board.appendChild(food);
+}
+
+function onKeyDown(e) {
+    switch (e.key) {
+        case 'ArrowRight':
+            direction = direction!='l'?'r':direction;
+            break;
+        case 'ArrowLeft':
+            direction = direction!='r'?'l':direction;
+            break;
+        case 'ArrowUp':
+            direction = direction!='d'?'u':direction;
+            break;
+        case 'ArrowDown':
+            direction = direction!='u'?'d':direction;
+            break;
     }
-    else if (e.keyCode == '40' && moveRight < 2 && moveDOwn != 1 && moveUp != 1) { //down
-        if (moveLeft == 1) {
-            snakeHead += 1;
-        } else if (moveRight == 1) {
-            snakeHead -= 1;
-        }
-        snakeHead += 10;
-        moveDOwn = 1;
-        moveUp = 0;
-        moveLeft = 0;
-        moveRight = 0;
-        moveSnake();
+    if (gameStart === false && direction === 'r') {
+        timer = setInterval(snakeMove, interval);
+        gameStart = true;
     }
-    else if (e.keyCode == '37' && moveRight == 0 && moveLeft != 1) { //left
-        --snakeHead;
-        if (moveDOwn == 1) {
-            snakeHead -= 10;
-        } 
-        moveLeft = 1;
-        moveRight = 0;
-        moveDOwn = 0;
-        moveUp = 0;
-        moveSnake();
+}
+
+function snakeMove() {
+    let l = parseInt(head.style.left);
+    let t = parseInt(head.style.top);
+    if (direction === 'r') {
+        head.style.top = `${t}px`;
+        head.style.left = `${l + cell}px`;
+    } else if (direction === 'u') {
+        head.style.top = `${t - cell}px`;
+        head.style.left = `${l}px`;
+    } else if (direction === 'd') {
+        head.style.top = `${t + cell}px`;
+        head.style.left = `${l}px`;
+    } else if (direction === 'l') {
+        head.style.top = `${t}px`;
+        head.style.left = `${l - cell}px`;
+    }
+    for (let i = 1; i < snake.length; ++i) {
+        let tOld = t;
+        let lOld = l;
+        t = parseInt(snake[i].style.top);
+        l = parseInt(snake[i].style.left);
+        snake[i].style.top = `${tOld}px`;
+        snake[i].style.left = `${lOld}px`;
+        checkSnakeCollision(i);
+    }
+    checkWallCollision()
+    checkFoodCollision();
+}
+
+function checkSnakeCollision(i) {
+    if (head.style.top === snake[i].style.top && head.style.left === snake[i].style.left) {
+        alert("You Lost!");
+        clearInterval(timer);
+    }
+}
+
+function checkWallCollision() {
+    if (head.style.top === `${-cell}px` || head.style.top === `${width}px` || head.style.left === `${-cell}px` || head.style.left === `${width}px`) {
+        alert("You Lost!");
+        clearInterval(timer);
     } 
 }
 
-let snakeMove = 1;
-
-function moveSnake() {
-    if (moveRight == 1) {
-        let snk = document.getElementById(snakeHead);
-        snk.style.backgroundColor = "black";
-        let remove = document.getElementById(snakeHead - 3);
-        remove.style.backgroundColor = "white";
-        ++snakeHead;
-        moveInterval();
-    } else if (moveLeft == 1) {
-        let snk = document.getElementById(snakeHead);
-        snk.style.backgroundColor = "black";
-        let remove = document.getElementById(snakeHead + 3);
-        remove.style.backgroundColor = "white";
-        --snakeHead;
-        moveInterval();
-    } else if (moveDOwn == 1) {
-        div = document.getElementById(snakeHead);
-        div.style.backgroundColor = "black";
-        let remove = document.getElementById(snakeHead - 30);
-        remove.style.backgroundColor = "white";
-        snakeHead += 10;
-        moveInterval();
-    } else if (moveUp == 1) {
-        div = document.getElementById(snakeHead - 10);
-        div.style.backgroundColor = "black";
-        let remove = document.getElementById(snakeHead + 20);
-        remove.style.backgroundColor = "white";
-        snakeHead -= 10;
-        moveInterval();
+function checkFoodCollision() {
+    if (head.style.top === food.style.top && head.style.left === food.style.left) {
+        snake.push(food);
+        ++foodCounter;
+        if (foodCounter == 10) {
+            interval -= 10;
+            clearInterval(timer);
+            timer = setInterval(snakeMove, interval);
+            foodCounter = 0;
+        }
+        generateFood();
+        checkWin();
     }
 }
 
-let nInterval;
-function moveInterval() {
-    if (!nInterval) {
-        nInterval = setInterval(moveSnake, 1000);
+function checkWin() {
+    if (snake.length - 1 === ((width / cell) * (length / cell)) - 1) { 
+        clearInterval(timer);
+        alert("You WIN!");
     }
 }
-
-

@@ -1,20 +1,22 @@
 .board {
-    width: 400px;
-    height: 400px;
-    display: flex;
-    flex-wrap: wrap;
+    margin:10px;
+    width:310px;
+    height: 310px;
+    border:10px solid black;
+    position:relative;
 }
 
 .board div {
-    height: 40px;
-    width: 40px;
-    border: 1px solid black;
-}
-
-.snake {
+    border: 1px solid green;
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    display: inline-block;
     background-color: black;
 }
 
-.snakeWhite {
-    background-color: white;
+img {
+    width: 310px;
+    height: 120px;
+    border: 10px solid black;
 }

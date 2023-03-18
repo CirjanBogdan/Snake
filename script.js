@@ -46,16 +46,24 @@ function generateFood() {
 function onKeyDown(e) {
     switch (e.key) {
         case 'ArrowRight':
-            direction = direction!='l'?'r':direction;
+            if (direction != 'l') {
+                direction = 'r';
+            }
             break;
         case 'ArrowLeft':
-            direction = direction!='r'?'l':direction;
+            if (direction != 'r') {
+                direction = 'l';
+            }
             break;
         case 'ArrowUp':
-            direction = direction!='d'?'u':direction;
+            if (direction != 'd') {
+                direction = 'u';
+            }
             break;
         case 'ArrowDown':
-            direction = direction!='u'?'d':direction;
+            if (direction != 'u') {
+                direction = 'd';
+            }
             break;
     }
     if (gameStart === false && direction === 'r') {
